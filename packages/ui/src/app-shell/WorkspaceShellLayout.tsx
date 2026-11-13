@@ -106,7 +106,10 @@ import {
 } from "@/components/ui/resizable.js";
 import { PreviewPane } from "@/PreviewPane.js";
 import { WorkspaceFileTree } from "@/workspace-file-tree/WorkspaceFileTree.js";
-import { useWorkspaceShellLayoutMode } from "@/hooks/useWorkspaceShellLayoutMode.js";
+import {
+  useSetWorkspaceShellLayoutMode,
+  useWorkspaceShellLayoutMode,
+} from "@/hooks/useWorkspaceShellLayoutMode.js";
 import { isWorkspaceIdeShellActive } from "@/lib/workspaceShellLayoutMode.js";
 import type { CodeViewerSource } from "@/lib/codeViewer.js";
 import { toast } from "@/components/ui/toast.js";
@@ -511,6 +514,7 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
   const isLinuxDesktop = Boolean(isDesktop && !isMacDesktop && !isWindowsDesktop);
   const isWebRemoteControlShell = Boolean(webRemoteControlWorkspaceSwitcher);
   const workspaceShellLayoutMode = useWorkspaceShellLayoutMode();
+  const setWorkspaceShellLayoutMode = useSetWorkspaceShellLayoutMode();
   const isIdeLayout = isWorkspaceIdeShellActive({
     layoutMode: workspaceShellLayoutMode,
     isDesktop: Boolean(isDesktop),
@@ -2732,15 +2736,42 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
               className="h-full"
             >
               {isIdeLayout ? (
-                <WorkspaceFileTree
-                  workspacePath={workspaceAbsPath}
-                  workspaceName={projectName}
-                  workspaceIdentity={workspaceIdentity}
-                  workspaceRemoteSessionId={workspaceRemoteSessionId ?? undefined}
-                  activePreviewPath={readCodeViewerSourcePath(primaryPreviewSource)}
-                  onOpenBrowserUrl={handleOpenBrowserUrl}
-                  onOpenPreview={handleOpenCodeViewer}
-                />
+                <div className="flex h-full min-h-0 flex-col" data-testid="workspace-ide-explorer">
+                  {/* IDE 换掉任务侧栏后，布局回退与设置入口必须留在文件树顶栏。 */}
+                  <div className="flex shrink-0 items-center gap-1 border-b border-border px-2 py-1.5">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 px-2 text-ui-caption"
+                      data-testid="workspace-ide-exit-layout"
+                      onClick={() => setWorkspaceShellLayoutMode("agent-primary")}
+                    >
+                      {intl.formatMessage({ id: "settings.workspaceShellLayoutMode.agentPrimary" })}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="ml-auto h-7 px-2 text-ui-caption"
+                      data-testid="workspace-ide-open-settings"
+                      onClick={() => tabStoreApi.getState().openSettingsTab()}
+                    >
+                      {intl.formatMessage({ id: "taskList.openSettings" })}
+                    </Button>
+                  </div>
+                  <div className="min-h-0 flex-1">
+                    <WorkspaceFileTree
+                      workspacePath={workspaceAbsPath}
+                      workspaceName={projectName}
+                      workspaceIdentity={workspaceIdentity}
+                      workspaceRemoteSessionId={workspaceRemoteSessionId ?? undefined}
+                      activePreviewPath={readCodeViewerSourcePath(primaryPreviewSource)}
+                      onOpenBrowserUrl={handleOpenBrowserUrl}
+                      onOpenPreview={handleOpenCodeViewer}
+                    />
+                  </div>
+                </div>
               ) : (
                 <V4SplitPaneEntryProvider
                   enabled={!isWebRemoteControlShell && !isWebRemoteControlMobileViewport}

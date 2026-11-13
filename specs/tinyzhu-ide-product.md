@@ -28,3 +28,5 @@ Ship the desktop app and VS Code sidebar under the product name **TinyZhuIDE**. 
 2. Mac arm64 pack produces `TinyZhuIDE-*-mac-arm64.dmg` (or matching artifact name) and an app bundle whose dock name is TinyZhuIDE.
 3. Installing the app to `/Applications/TinyZhuIDE.app` launches without conflicting with an existing ZCode.app.
 4. Extension / sidebar shows TinyZhuIDE branding and Antigravity-like composer layout.
+5. Packaged About / tray / window title use TinyZhuIDE (not leftover ZCode chrome strings).
+6. CUA Helper Team allowlist still names `dev.zcode.app` only; TinyZhuIDE Computer Use needs a follow-up allowlist PR if CUA is required on this SKU.

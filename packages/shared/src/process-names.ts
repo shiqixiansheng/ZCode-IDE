@@ -49,7 +49,12 @@ export function formatZCodeHostProcessName(label?: string): string {
 
 export function formatZCodeRendererProcessName(windowTitle?: string): string {
   const normalizedTitle = windowTitle?.trim();
-  if (!normalizedTitle || normalizedTitle === "ZCode") {
+  // TinyZhuIDE 与历史 ZCode 主窗标题都归一为 renderer:main，避免重品牌后进程名分裂。
+  if (
+    !normalizedTitle ||
+    normalizedTitle === "ZCode" ||
+    normalizedTitle === "TinyZhuIDE"
+  ) {
     return joinZCodeProcessName("renderer", "main");
   }
 
@@ -57,13 +62,14 @@ export function formatZCodeRendererProcessName(windowTitle?: string): string {
     return joinZCodeProcessName("renderer", "resource-manager");
   }
 
-  const remoteWindowPrefix = "ZCode - ";
-  if (normalizedTitle.startsWith(remoteWindowPrefix)) {
-    return joinZCodeProcessName(
-      "renderer",
-      "remote",
-      normalizedTitle.slice(remoteWindowPrefix.length),
-    );
+  for (const remoteWindowPrefix of ["ZCode - ", "TinyZhuIDE - "] as const) {
+    if (normalizedTitle.startsWith(remoteWindowPrefix)) {
+      return joinZCodeProcessName(
+        "renderer",
+        "remote",
+        normalizedTitle.slice(remoteWindowPrefix.length),
+      );
+    }
   }
 
   return joinZCodeProcessName("renderer", normalizedTitle);

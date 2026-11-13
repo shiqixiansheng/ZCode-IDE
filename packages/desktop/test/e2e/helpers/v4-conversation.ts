@@ -234,6 +234,9 @@ export async function waitForV4WorkspacePresentationReady(
 }
 
 async function ensureV4ShellReady() {
+  // 桌面缺省 ide 时左栏是文件树，项目行不在侧栏；harness 先写入并刷新到 agent-primary。
+  // 登录/引导页尚无壳层 data 属性，不能在 refresh 前 await 该属性。
+  await seedAgentPrimaryLayoutPreferenceAndReload();
   try {
     // 新隔离 profile 的职业引导会遮住工作区，先复用真实 UI 跳过流程。
     await skipOccupationOnboardingIfPresent();
@@ -244,8 +247,19 @@ async function ensureV4ShellReady() {
       throw error;
     }
     await loginWithApiKey();
+    await seedAgentPrimaryLayoutPreferenceAndReload();
     await skipOccupationOnboardingIfPresent();
     await waitForProjectRow(DEFAULT_WORKSPACE, { timeout: 30000 });
+  }
+}
+
+async function seedAgentPrimaryLayoutPreferenceAndReload() {
+  await browser.execute(() => {
+    localStorage.setItem("zcode-workspace-shell-layout-mode", "agent-primary");
+  });
+  // jsdom engineering mocks omit refresh; real WDIO sessions always have it.
+  if (typeof browser.refresh === "function") {
+    await browser.refresh();
   }
 }
 

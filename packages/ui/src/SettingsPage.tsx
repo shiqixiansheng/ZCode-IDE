@@ -447,6 +447,8 @@ export function SettingsPage({
   >([]);
   const interfaceMode = useZCodeStore((state) => state.interfaceMode);
   const setInterfaceMode = useSetInterfaceModeWithTelemetry(platform, "app.setting");
+  const workspaceShellLayoutMode = useZCodeStore((state) => state.workspaceShellLayoutMode);
+  const setWorkspaceShellLayoutMode = useZCodeStore((state) => state.setWorkspaceShellLayoutMode);
   const theme = useZCodeStore((state) => state.theme);
   const setTheme = useZCodeStore((state) => state.setTheme);
   const codePreviewSettings = useZCodeStore((state) => state.codePreviewSettings);
@@ -1794,6 +1796,8 @@ export function SettingsPage({
                               localePreference={localePreference}
                               interfaceMode={interfaceMode}
                               setInterfaceMode={setInterfaceMode}
+                              workspaceShellLayoutMode={workspaceShellLayoutMode}
+                              setWorkspaceShellLayoutMode={setWorkspaceShellLayoutMode}
                               isDesktop={isDesktop}
                               isWindowsDesktop={isWindowsDesktop}
                               isLinuxDesktop={isLinuxDesktop}

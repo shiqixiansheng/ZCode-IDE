@@ -3715,6 +3715,12 @@ const enUS: Record<string, string> = {
   "settings.interfaceMode.coding": "Coding mode",
   "settings.interfaceMode.description":
     "Office mode focuses on summaries and results. Coding mode shows commands, output, and code changes.",
+  "settings.workspaceShellLayoutMode": "Workspace layout",
+  "settings.workspaceShellLayoutMode.agentPrimary": "Agent centered",
+  "settings.workspaceShellLayoutMode.ide": "IDE layout",
+  "settings.workspaceShellLayoutMode.description":
+    "Agent centered keeps the task list, conversation, and tool pane. IDE layout shows the file tree, a preview, and chat on the right.",
+  "workspaceShell.idePreview.empty": "Open a file from the tree",
   "chat.toolCall.execute.conciseCompleted": "Ran a command",
   "chat.contextOptimization.started": "Optimizing conversation",
   "chat.contextOptimization.skipped": "No conversation optimization needed",

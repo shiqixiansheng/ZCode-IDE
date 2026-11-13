@@ -238,6 +238,8 @@ export function App({
     setBrowserNavigationRequest,
     handleOpenCodeViewer,
     handleOpenCodeViewers,
+    primaryPreviewSource,
+    clearPrimaryPreview,
     handleOpenBrowserUrl,
     handleToggleBrowser,
     handleOpenBrowserTab,
@@ -288,6 +290,7 @@ export function App({
     isDesktop,
     isWorkspaceVisible,
     supportsEmbeddedBrowser,
+    isWebRemoteControlShell: Boolean(webRemoteControlWorkspaceSwitcher),
     platform,
     defaultWhiteboardNamePrefix: intl.formatMessage({
       id: "whiteboard.defaultName",
@@ -1383,6 +1386,8 @@ export function App({
             handleToggleSidePane={handleToggleSidePane}
             handleOpenBrowserUrl={handleOpenBrowserUrl}
             handleOpenCodeViewer={handleOpenCodeViewerIfWritable}
+            primaryPreviewSource={primaryPreviewSource}
+            clearPrimaryPreview={clearPrimaryPreview}
             handleAutoOpenAssistantPptx={handleAutoOpenAssistantPptx}
             handleOpenSubagentSession={handleOpenSubagentSession}
             handleOpenBackgroundBash={handleOpenBackgroundBash}

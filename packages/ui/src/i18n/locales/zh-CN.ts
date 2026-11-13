@@ -3472,6 +3472,12 @@ const zhCN: Record<string, string> = {
   "settings.interfaceMode.coding": "编程模式",
   "settings.interfaceMode.description":
     "办公模式侧重操作摘要与结果；编程模式显示命令、输出和代码变更详情。",
+  "settings.workspaceShellLayoutMode": "工作区布局",
+  "settings.workspaceShellLayoutMode.agentPrimary": "Agent 居中",
+  "settings.workspaceShellLayoutMode.ide": "IDE 布局",
+  "settings.workspaceShellLayoutMode.description":
+    "Agent 居中是任务列表、对话和工具侧栏。IDE 布局是文件树、预览和右侧对话。",
+  "workspaceShell.idePreview.empty": "从左侧文件树打开文件",
   "chat.toolCall.execute.conciseCompleted": "已运行命令",
   "chat.contextOptimization.started": "正在优化对话",
   "chat.contextOptimization.skipped": "无需优化对话",

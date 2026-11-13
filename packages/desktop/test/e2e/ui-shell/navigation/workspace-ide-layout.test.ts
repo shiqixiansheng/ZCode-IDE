@@ -9,21 +9,39 @@ import { clearAppData, clickTestIdByDom } from "#e2e/helpers/desktop-app";
 import { prepareV4ConversationE2E } from "#e2e/helpers/v4-conversation";
 
 /**
- * IDE 列拓扑：设置切到 ide 后壳层 data 属性与文件树顶栏回退入口可见。
+ * IDE 列拓扑：新鲜存储默认 ide；设置切换与退出入口可见。
  * 不发送模型请求。
  */
 describe("工作区 IDE 布局", () => {
   before(async () => {
     await prepareV4ConversationE2E({ skipProvider: true });
-    await setLayoutMode("agent-primary");
   });
 
   after(async () => {
-    await setLayoutMode("agent-primary");
     await clearAppData();
   });
 
+  it("IDE-00 键未设置时默认 IDE 布局，无需手写 localStorage 为 ide", async () => {
+    // clearAppData 会退出 Electron；此处只删布局键模拟新鲜存储。
+    await browser.execute(() => {
+      localStorage.removeItem("zcode-workspace-shell-layout-mode");
+    });
+    await browser.refresh();
+    await waitForShellAttr("ide");
+    await $('[data-workspace-shell-layout="ide"]').waitForDisplayed();
+    await $('[data-testid="workspace-ide-explorer"]').waitForDisplayed();
+    await $('[data-testid="workspace-ide-preview"]').waitForDisplayed();
+    const stored = await browser.execute(() =>
+      localStorage.getItem("zcode-workspace-shell-layout-mode"),
+    );
+    // 缺省键时 store 可不回写；壳层仍须为 ide。若已回写则须为 ide。
+    if (stored != null) {
+      expect(stored).toBe("ide");
+    }
+  });
+
   it("IDE-01 切换为 IDE 布局后出现三栏壳与回退入口", async () => {
+    await setLayoutMode("agent-primary");
     await setLayoutModeViaSettings("ide");
     await waitForLayout("ide");
     await $('[data-workspace-shell-layout="ide"]').waitForDisplayed();
@@ -79,5 +97,18 @@ async function waitForLayout(mode: "agent-primary" | "ide") {
         mode,
       ),
     { timeout: 15000, timeoutMsg: `布局未变为 ${mode}` },
+  );
+  await waitForShellAttr(mode);
+}
+
+async function waitForShellAttr(mode: "agent-primary" | "ide") {
+  await browser.waitUntil(
+    async () =>
+      browser.execute(
+        (expected) =>
+          document.querySelector(`[data-workspace-shell-layout="${expected}"]`) != null,
+        mode,
+      ),
+    { timeout: 15000, timeoutMsg: `壳层 data-workspace-shell-layout 未变为 ${mode}` },
   );
 }

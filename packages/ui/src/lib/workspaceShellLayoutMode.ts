@@ -6,6 +6,9 @@ export type WorkspaceShellLayoutMode = "agent-primary" | "ide";
 
 export const WORKSPACE_SHELL_LAYOUT_MODE_STORAGE_KEY = "zcode-workspace-shell-layout-mode";
 
+/** 键未写入时的桌面默认；显式 agent-primary / 非法值仍走 normalize。 */
+export const DEFAULT_WORKSPACE_SHELL_LAYOUT_MODE: WorkspaceShellLayoutMode = "ide";
+
 export function normalizeWorkspaceShellLayoutMode(value: unknown): WorkspaceShellLayoutMode {
   return value === "ide" ? "ide" : "agent-primary";
 }

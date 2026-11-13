@@ -45,6 +45,7 @@ import {
   type InterfaceMode,
 } from "@/lib/interfaceMode.js";
 import {
+  DEFAULT_WORKSPACE_SHELL_LAYOUT_MODE,
   WORKSPACE_SHELL_LAYOUT_MODE_STORAGE_KEY,
   normalizeWorkspaceShellLayoutMode,
   type WorkspaceShellLayoutMode,
@@ -320,9 +321,13 @@ export function createZCodeStore(
       writeSafeLocalStorage(INTERFACE_MODE_STORAGE_KEY, interfaceMode);
       set({ interfaceMode });
     },
-    workspaceShellLayoutMode: normalizeWorkspaceShellLayoutMode(
-      readSafeLocalStorage(WORKSPACE_SHELL_LAYOUT_MODE_STORAGE_KEY),
-    ),
+    // 缺省键默认 ide，使桌面首次打开即可见 Cursor 式三栏；已写入的 agent-primary 不变。
+    workspaceShellLayoutMode: (() => {
+      const raw = readSafeLocalStorage(WORKSPACE_SHELL_LAYOUT_MODE_STORAGE_KEY);
+      return raw == null
+        ? DEFAULT_WORKSPACE_SHELL_LAYOUT_MODE
+        : normalizeWorkspaceShellLayoutMode(raw);
+    })(),
     setWorkspaceShellLayoutMode: (mode) => {
       const workspaceShellLayoutMode = normalizeWorkspaceShellLayoutMode(mode);
       if (get().workspaceShellLayoutMode !== workspaceShellLayoutMode) {

@@ -12,10 +12,12 @@
 
 新增正交偏好：
 
-| 字段                       | 取值                    | 含义                                         |
-| -------------------------- | ----------------------- | -------------------------------------------- |
-| `workspaceShellLayoutMode` | `agent-primary`（默认） | 现状：左任务栏 \| 中对话 \| 右工具侧栏       |
-| `workspaceShellLayoutMode` | `ide`                   | Cursor 式：左文件树 \| 中预览/代码 \| 右对话 |
+| 字段                       | 取值              | 含义                                         |
+| -------------------------- | ----------------- | -------------------------------------------- |
+| `workspaceShellLayoutMode` | `ide`（桌面默认） | Cursor 式：左文件树 \| 中预览/代码 \| 右对话 |
+| `workspaceShellLayoutMode` | `agent-primary`   | 左任务栏 \| 中对话 \| 右工具侧栏             |
+
+桌面在 localStorage 键 `zcode-workspace-shell-layout-mode` **未设置**时默认 `ide`（常量 `DEFAULT_WORKSPACE_SHELL_LAYOUT_MODE`）。用户显式选择的 `agent-primary` 仍有效。显式非法值仍按 `normalizeWorkspaceShellLayoutMode` 落到 `agent-primary`，不把垃圾值改写成 `ide`。
 
 二者独立。IDE 布局在 `office` 下仍可用，但侧栏开发入口仍受 `interfaceMode` 过滤。
 
@@ -51,9 +53,9 @@ paneLayoutStore（对话 split）       -> 仅 agent-primary 中心对话分屏�
 
 ## 验收场景
 
-1. 桌面打开本地 workspace，切到 `ide`：三栏为树 \| 预览空态 \| 对话。
+1. 桌面清数据 / 首次打开本地 workspace（键未设置）：壳层即为 `ide`，三栏为树 \| 预览空态 \| 对话，无需先改设置。
 2. 树中打开文本文件：中栏出现预览，右栏对话仍在。
 3. 切回 `agent-primary`：中心恢复对话，文件树不再占据左栏主位。
 4. 模式切换不丢当前 sessionId，不重启 app-server。
 
-E2E：`packages/desktop/test/e2e/ui-shell/` 增加一条上述 1–2 路径（或浏览器验收等价场景）。
+E2E：`packages/desktop/test/e2e/ui-shell/navigation/workspace-ide-layout.test.ts` 覆盖新鲜存储默认 `ide`，以及设置切换 / 退出路径。

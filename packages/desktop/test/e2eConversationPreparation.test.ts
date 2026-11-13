@@ -49,6 +49,7 @@ beforeEach(() => {
   vi.spyOn(HTMLElement.prototype, "getClientRects").mockReturnValue([{}] as DOMRectList);
   vi.stubGlobal("browser", {
     execute: async (fn: (...args: unknown[]) => unknown, ...args: unknown[]) => fn(...args),
+    refresh: vi.fn(),
     waitUntil: async (predicate: () => Promise<boolean>, options: { timeoutMsg: string }) => {
       if (!(await predicate())) throw new Error(options.timeoutMsg);
     },

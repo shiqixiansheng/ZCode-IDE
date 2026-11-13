@@ -257,7 +257,10 @@ async function seedAgentPrimaryLayoutPreferenceAndReload() {
   await browser.execute(() => {
     localStorage.setItem("zcode-workspace-shell-layout-mode", "agent-primary");
   });
-  await browser.refresh();
+  // jsdom engineering mocks omit refresh; real WDIO sessions always have it.
+  if (typeof browser.refresh === "function") {
+    await browser.refresh();
+  }
 }
 
 async function ensureV4PreparationDraft(options: PrepareV4ConversationE2EOptions) {

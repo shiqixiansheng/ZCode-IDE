@@ -44,6 +44,11 @@ import {
   normalizeInterfaceMode,
   type InterfaceMode,
 } from "@/lib/interfaceMode.js";
+import {
+  WORKSPACE_SHELL_LAYOUT_MODE_STORAGE_KEY,
+  normalizeWorkspaceShellLayoutMode,
+  type WorkspaceShellLayoutMode,
+} from "@/lib/workspaceShellLayoutMode.js";
 import { logger } from "@/logger.js";
 
 export type LoginEntryPurpose = "app-login";
@@ -131,6 +136,10 @@ export interface ZCodeState {
   /** 展示详情偏好，不改变 Agent 权限或执行能力。 */
   interfaceMode: InterfaceMode;
   setInterfaceMode: (mode: InterfaceMode) => void;
+
+  /** 壳层列拓扑：agent-primary=任务|对话|侧栏；ide=文件树|预览|对话。 */
+  workspaceShellLayoutMode: WorkspaceShellLayoutMode;
+  setWorkspaceShellLayoutMode: (mode: WorkspaceShellLayoutMode) => void;
 
   /** 当前主题 */
   theme: Theme;
@@ -257,6 +266,7 @@ const BROADCAST_FIELDS = new Set([
   "uiFontSizePx",
   "fontSmoothingEnabled",
   "interfaceMode",
+  "workspaceShellLayoutMode",
   "notificationEnabled",
   "hideProjectDeviceNames",
 ]);
@@ -267,6 +277,7 @@ type BroadcastField =
   | "uiFontSizePx"
   | "fontSmoothingEnabled"
   | "interfaceMode"
+  | "workspaceShellLayoutMode"
   | "hideProjectDeviceNames"
   // 任务通知开关跨窗口同步：角标是应用级表面，A 窗口关通知而 B 窗口仍上报未读时，
   // 主进程 max 聚合会让任务栏/托盘继续亮，设置与提醒状态错位。
@@ -308,6 +319,20 @@ export function createZCodeStore(
       }
       writeSafeLocalStorage(INTERFACE_MODE_STORAGE_KEY, interfaceMode);
       set({ interfaceMode });
+    },
+    workspaceShellLayoutMode: normalizeWorkspaceShellLayoutMode(
+      readSafeLocalStorage(WORKSPACE_SHELL_LAYOUT_MODE_STORAGE_KEY),
+    ),
+    setWorkspaceShellLayoutMode: (mode) => {
+      const workspaceShellLayoutMode = normalizeWorkspaceShellLayoutMode(mode);
+      if (get().workspaceShellLayoutMode !== workspaceShellLayoutMode) {
+        logger.debug("[WorkspaceShellLayoutMode] 切换壳层布局", {
+          workspaceShellLayoutMode,
+          source: applyingBroadcast ? "broadcast" : "local",
+        });
+      }
+      writeSafeLocalStorage(WORKSPACE_SHELL_LAYOUT_MODE_STORAGE_KEY, workspaceShellLayoutMode);
+      set({ workspaceShellLayoutMode });
     },
     // 默认主题统一收敛到 Zai dark，避免首次启动时 store 与其他主题入口表现不一致。
     // 仍然优先尊重 localStorage 中已保存的用户选择，不覆盖已有偏好。
@@ -567,6 +592,11 @@ export function createZCodeStore(
         (msg.payload === "office" || msg.payload === "coding")
       ) {
         state.setInterfaceMode(normalizeInterfaceMode(msg.payload));
+      } else if (
+        field === "workspaceShellLayoutMode" &&
+        (msg.payload === "agent-primary" || msg.payload === "ide")
+      ) {
+        state.setWorkspaceShellLayoutMode(normalizeWorkspaceShellLayoutMode(msg.payload));
       } else if (field === "fontSmoothingEnabled" && typeof msg.payload === "boolean") {
         state.setFontSmoothingEnabled(msg.payload);
       } else if (field === "uiFontSizePx" && typeof msg.payload === "number") {

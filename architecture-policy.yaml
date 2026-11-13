@@ -1943,6 +1943,12 @@ exceptions:
     rule: unmanaged-new-file
     paths: [packages/ui/src/settings/PersonalizationSection.tsx]
     reason: 个性化设置分区组件只编排 ISettingService 的 getUserInstructions/saveUserInstructions 与既有设置页 UI 原语（spec：docs/ui/settings-personalization.md）；读写唯一事实源在服务层，不新增平行状态，接管整个 ui 目录不在本次范围内。
+  - id: workspace-shell-layout-mode
+    rule: unmanaged-new-file
+    paths:
+      - packages/ui/src/lib/workspaceShellLayoutMode.ts
+      - packages/ui/src/hooks/useWorkspaceShellLayoutMode.ts
+    reason: 壳层列拓扑偏好与读取 hook，对齐既有 interfaceMode（docs/ui/cursor-ide-layout-mode.md）；状态所有者仍是 ZCodeStore，不接管整个 ui 目录。
   - id: settings-personalization-size-constant-new-file
     rule: unmanaged-new-file
     paths: [packages/shared/src/userInstructions.ts]

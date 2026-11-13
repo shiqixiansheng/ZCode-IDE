@@ -1,0 +1,84 @@
+{
+  "name": "zcode",
+  "displayName": "ZCode",
+  "description": "Local ZCode agent sidebar for VS Code (Antigravity-shaped shell, zcode app-server backend).",
+  "version": "0.1.0",
+  "publisher": "zcode",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": ["AI", "Chat"],
+  "activationEvents": ["onView:zcode.sidebar", "onCommand:zcode.toggleChatFocus"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "zcode",
+          "title": "ZCode",
+          "icon": "media/zcode.svg"
+        }
+      ]
+    },
+    "views": {
+      "zcode": [
+        {
+          "type": "webview",
+          "id": "zcode.sidebar",
+          "name": "Chat"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "zcode.toggleChatFocus",
+        "title": "ZCode: Toggle Chat Focus"
+      },
+      {
+        "command": "zcode.startNewConversation",
+        "title": "ZCode: New Conversation"
+      },
+      {
+        "command": "zcode.stopAgent",
+        "title": "ZCode: Stop Running Turn"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "zcode.toggleChatFocus",
+        "key": "ctrl+l",
+        "mac": "cmd+l"
+      },
+      {
+        "command": "zcode.startNewConversation",
+        "key": "ctrl+shift+l",
+        "mac": "cmd+shift+l"
+      }
+    ],
+    "configuration": {
+      "title": "ZCode",
+      "properties": {
+        "zcode.agentEntry": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to zcode.cjs (or CLI entry). Empty = resolve from workspace / env ZCODE_AGENT_ENTRY."
+        },
+        "zcode.agentStartupTimeoutMs": {
+          "type": "number",
+          "default": 30000,
+          "description": "Max wait for local app-server storage ready / first RPC."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/vscode": "^1.90.0",
+    "typescript": "^5.8.0"
+  }
+}

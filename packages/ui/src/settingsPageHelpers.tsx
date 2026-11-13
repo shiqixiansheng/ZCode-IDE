@@ -44,6 +44,10 @@ import { PluginAutoRecommendationSetting } from "@/settings/PluginAutoRecommenda
 import { DynamicWorkflowModeSetting } from "@/settings/DynamicWorkflowModeSetting.js";
 import { normalizeInterfaceMode, type InterfaceMode } from "@/lib/interfaceMode.js";
 import {
+  normalizeWorkspaceShellLayoutMode,
+  type WorkspaceShellLayoutMode,
+} from "@/lib/workspaceShellLayoutMode.js";
+import {
   createSettingsPageConfig,
   resolveSettingsSectionForPlatform,
   SETTINGS_SECTION_GROUPS,
@@ -139,6 +143,8 @@ export function GeneralSectionContent({
   localePreference,
   interfaceMode = "coding",
   setInterfaceMode = () => {},
+  workspaceShellLayoutMode = "agent-primary",
+  setWorkspaceShellLayoutMode,
   notificationEnabled,
   notificationSoundEnabled,
   closeToTrayOnWindows,
@@ -183,6 +189,8 @@ export function GeneralSectionContent({
   localePreference: LocalePreference;
   interfaceMode?: InterfaceMode;
   setInterfaceMode?: (mode: InterfaceMode) => void;
+  workspaceShellLayoutMode?: WorkspaceShellLayoutMode;
+  setWorkspaceShellLayoutMode?: (mode: WorkspaceShellLayoutMode) => void;
   notificationEnabled: boolean;
   notificationSoundEnabled: boolean;
   closeToTrayOnWindows: boolean;
@@ -412,6 +420,41 @@ export function GeneralSectionContent({
             </Select>
           }
         />
+        {isDesktop && setWorkspaceShellLayoutMode ? (
+          <SettingsRow
+            searchId="settings.workspaceShellLayoutMode"
+            controlLayout="wide"
+            label={intl.formatMessage({ id: "settings.workspaceShellLayoutMode" })}
+            description={intl.formatMessage({
+              id: "settings.workspaceShellLayoutMode.description",
+            })}
+            control={
+              <Select
+                value={workspaceShellLayoutMode}
+                onValueChange={(value) =>
+                  setWorkspaceShellLayoutMode(normalizeWorkspaceShellLayoutMode(value))
+                }
+              >
+                <SelectTrigger
+                  size="lg"
+                  className="w-full min-w-0 sm:w-64"
+                  aria-label={intl.formatMessage({ id: "settings.workspaceShellLayoutMode" })}
+                  data-testid="settings-workspace-shell-layout-mode"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="agent-primary">
+                    {intl.formatMessage({ id: "settings.workspaceShellLayoutMode.agentPrimary" })}
+                  </SelectItem>
+                  <SelectItem value="ide">
+                    {intl.formatMessage({ id: "settings.workspaceShellLayoutMode.ide" })}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            }
+          />
+        ) : null}
         {hasServices ? <ProactiveSuggestionsSetting /> : null}
       </SettingsGroupCard>
 

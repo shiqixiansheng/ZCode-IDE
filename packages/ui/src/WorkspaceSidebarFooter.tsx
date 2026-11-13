@@ -37,6 +37,7 @@ import {
   LogInIcon,
   LogOut,
   Maximize,
+  Columns3,
   Palette,
   Settings,
   User,
@@ -49,6 +50,11 @@ import { useZCodeIntl } from "@/i18n/IntlProvider.js";
 import { useShortcutCommandLabel } from "@/shortcuts/useShortcutBindings.js";
 import { useZCodeStore } from "@/store/StoreProvider.js";
 import { normalizeInterfaceMode } from "@/lib/interfaceMode.js";
+import { normalizeWorkspaceShellLayoutMode } from "@/lib/workspaceShellLayoutMode.js";
+import {
+  useSetWorkspaceShellLayoutMode,
+  useWorkspaceShellLayoutMode,
+} from "@/hooks/useWorkspaceShellLayoutMode.js";
 import type { Theme } from "@/useTheme.js";
 import { WorkspaceWebRemoteControlTrigger } from "@/WorkspaceWebRemoteControlTrigger.js";
 import {
@@ -136,6 +142,8 @@ export const WorkspaceSidebarFooter = memo(function WorkspaceSidebarFooterCompon
   const openRewards = useOpenRewards();
   const interfaceMode = useZCodeStore((state) => state.interfaceMode);
   const setInterfaceMode = useSetInterfaceModeWithTelemetry(platform, "app.profile");
+  const workspaceShellLayoutMode = useWorkspaceShellLayoutMode();
+  const setWorkspaceShellLayoutMode = useSetWorkspaceShellLayoutMode();
   const zoomInShortcutLabel = useShortcutCommandLabel("zoomIn");
   const zoomOutShortcutLabel = useShortcutCommandLabel("zoomOut");
   const resetZoomShortcutLabel = useShortcutCommandLabel("resetZoom");
@@ -386,6 +394,31 @@ export const WorkspaceSidebarFooter = memo(function WorkspaceSidebarFooterCompon
                 </DropdownMenuRadioGroup>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
+            {isDesktop ? (
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Columns3 className="size-4" />
+                  {intl.formatMessage({ id: "settings.workspaceShellLayoutMode" })}
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="w-48">
+                  <DropdownMenuRadioGroup
+                    value={workspaceShellLayoutMode}
+                    onValueChange={(value) =>
+                      setWorkspaceShellLayoutMode(normalizeWorkspaceShellLayoutMode(value))
+                    }
+                  >
+                    <DropdownMenuRadioItem value="agent-primary">
+                      {intl.formatMessage({
+                        id: "settings.workspaceShellLayoutMode.agentPrimary",
+                      })}
+                    </DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="ide">
+                      {intl.formatMessage({ id: "settings.workspaceShellLayoutMode.ide" })}
+                    </DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+            ) : null}
             {/* 快捷键设置（a58fdef 一系）：缩放子菜单 label 读生效表，设置页改绑后即时跟随 */}
             {/* Bugfix: ecc6952 收口重复缩放子菜单时误留了语言之后的那份，导致菜单顺序变成
                 语言→缩放→主题；账户菜单分组顺序固定为 语言→主题→界面模式→缩放→用量→登录/登出，

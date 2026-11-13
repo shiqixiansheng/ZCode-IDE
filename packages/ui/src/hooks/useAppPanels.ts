@@ -121,6 +121,11 @@ import { useWhiteboardStore } from "@/store/whiteboardStore.js";
 import { useModelTrajectoryOpenBridge } from "@/hooks/useModelTrajectoryOpenBridge.js";
 import { useServices } from "@/hooks/useServices.js";
 import { useIsOfficeMode } from "@/hooks/useInterfaceMode.js";
+import { useWorkspaceShellLayoutMode } from "@/hooks/useWorkspaceShellLayoutMode.js";
+import {
+  isWorkspaceIdeShellActive,
+  resolveFileOpenSurface,
+} from "@/lib/workspaceShellLayoutMode.js";
 import { clearSelectionSideChat } from "@/lib/selectionSideChatRuntime.js";
 import { clearConversationSelectionReferenceScope } from "@/lib/conversationSelectionReference.js";
 import {
@@ -226,6 +231,8 @@ export function useAppPanels(options: {
    */
   isWorkspaceVisible?: boolean;
   supportsEmbeddedBrowser?: boolean;
+  /** 远控壳不走 IDE 三栏；文件打开仍落侧栏。 */
+  isWebRemoteControlShell?: boolean;
   defaultWhiteboardNamePrefix: string;
   platform?: Pick<
     IPlatformService,
@@ -249,6 +256,7 @@ export function useAppPanels(options: {
     sidePaneOwnerId,
     isDesktop,
     supportsEmbeddedBrowser: explicitSupportsEmbeddedBrowser,
+    isWebRemoteControlShell = false,
     defaultWhiteboardNamePrefix,
     platform,
   } = options;
@@ -277,6 +285,21 @@ export function useAppPanels(options: {
   const optionalPlatform = useOptionalPlatform();
   const { windowControllerService, zcodeTaskService } = useBaseWorkspaceServices();
   const isOfficeMode = useIsOfficeMode();
+  const workspaceShellLayoutMode = useWorkspaceShellLayoutMode();
+  const ideShellActive = isWorkspaceIdeShellActive({
+    layoutMode: workspaceShellLayoutMode,
+    isDesktop: Boolean(isDesktop),
+    isWebRemoteControlShell,
+  });
+  const fileOpenLayoutMode = ideShellActive ? "ide" : "agent-primary";
+  const [primaryPreviewSource, setPrimaryPreviewSource] = useState<CodeViewerSource | null>(null);
+  const clearPrimaryPreview = useCallback(() => {
+    setPrimaryPreviewSource(null);
+  }, []);
+  // 中栏预览只属于当前 workspace。切走后清掉，避免下一份工作区看到上一份文件。
+  useEffect(() => {
+    setPrimaryPreviewSource(null);
+  }, [activeWorkspaceKey]);
   const sidePaneMemoryKey = useMemo(
     () =>
       buildTaskSidePaneMemoryKey({
@@ -614,6 +637,13 @@ export function useAppPanels(options: {
         requestFileManager(target);
         return;
       }
+      if (
+        resolveFileOpenSurface(fileOpenLayoutMode, {
+          preferSidePane: Boolean(target?.temporaryExternalDirectory),
+        }) === "primary-preview"
+      ) {
+        return;
+      }
       revealSidePaneForCurrentOwner();
       commitOpenedSidePaneState((current) =>
         openFileManagerSidePane(
@@ -629,6 +659,7 @@ export function useAppPanels(options: {
     [
       requestFileManager,
       commitOpenedSidePaneState,
+      fileOpenLayoutMode,
       revealSidePaneForCurrentOwner,
       workspaceAbsPath,
       workspaceIdentity,
@@ -824,6 +855,13 @@ export function useAppPanels(options: {
   const handleOpenCodeViewer = useCallback(
     (source: CodeViewerSource) => {
       const fallback = () => {
+        if (resolveFileOpenSurface(fileOpenLayoutMode) === "primary-preview") {
+          setPrimaryPreviewSource(source);
+          logger.info(
+            `[App] 打开中栏预览 workspace=${workspaceAbsPath} title=${source.title} path=${source.path ?? "none"}`,
+          );
+          return;
+        }
         revealSidePaneForCurrentOwner();
         commitOpenedSidePaneState((current) => {
           const next = openCodeViewerSidePane(current, source, sidePaneOwnerIdRef.current);
@@ -841,6 +879,7 @@ export function useAppPanels(options: {
     },
     [
       commitOpenedSidePaneState,
+      fileOpenLayoutMode,
       revealSidePaneForCurrentOwner,
       routeOfficeViewerFile,
       workspaceAbsPath,
@@ -850,6 +889,11 @@ export function useAppPanels(options: {
   const handleOpenCodeViewers = useCallback(
     (sources: readonly CodeViewerSource[]) => {
       if (sources.length === 0) return;
+      if (resolveFileOpenSurface(fileOpenLayoutMode) === "primary-preview") {
+        const source = sources[sources.length - 1];
+        if (source) setPrimaryPreviewSource(source);
+        return;
+      }
       revealSidePaneForCurrentOwner();
       commitOpenedSidePaneState((current) => {
         const next = openCodeViewerSidePanes(current, sources, sidePaneOwnerIdRef.current, 0);
@@ -859,7 +903,12 @@ export function useAppPanels(options: {
         return next;
       });
     },
-    [commitOpenedSidePaneState, revealSidePaneForCurrentOwner, workspaceAbsPath],
+    [
+      commitOpenedSidePaneState,
+      fileOpenLayoutMode,
+      revealSidePaneForCurrentOwner,
+      workspaceAbsPath,
+    ],
   );
 
   const handleOpenBrowserUrl = useCallback(
@@ -2125,6 +2174,8 @@ export function useAppPanels(options: {
     // 回调
     handleOpenCodeViewer,
     handleOpenCodeViewers,
+    primaryPreviewSource,
+    clearPrimaryPreview,
     handleOpenBrowserUrl,
     handleToggleBrowser,
     handleOpenBrowserTab,

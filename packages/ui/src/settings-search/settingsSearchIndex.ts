@@ -37,6 +37,12 @@ export const SETTINGS_SEARCH_ITEMS = [
     visibility: "all",
   },
   {
+    id: "settings.workspaceShellLayoutMode",
+    section: "general",
+    description: "settings.workspaceShellLayoutMode.description",
+    visibility: "desktop",
+  },
+  {
     id: "settings.terminalProfile",
     section: "general",
     description: "settings.terminalProfileDescription",

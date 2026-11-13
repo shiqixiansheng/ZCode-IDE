@@ -97,7 +97,7 @@ describe.skipIf(isWindows)("doctor-macos-release-app.sh", () => {
     const workspaceDir = makeTempDir("zcode-macos-preview-doctor-");
     const binDir = join(workspaceDir, "bin");
     const toolLog = join(workspaceDir, "tool.log");
-    const { appPath } = createReleaseApp(workspaceDir, "ZCode Preview");
+    const { appPath } = createReleaseApp(workspaceDir, "TinyZhuIDE Preview");
     const zcodeHome = join(workspaceDir, ".zcode");
     const helperAppPath = createZcodeHomeHelper(zcodeHome, "preview");
 
@@ -112,7 +112,7 @@ describe.skipIf(isWindows)("doctor-macos-release-app.sh", () => {
       ZCODE_HOME: zcodeHome,
     });
 
-    expect(output).toContain(`validating ZCode Preview.app: ${appPath}`);
+    expect(output).toContain(`validating TinyZhuIDE Preview.app: ${appPath}`);
     const log = readFileSync(toolLog, "utf-8");
     expect(log).toContain(`codesign\t--verify\t--deep\t--strict\t${appPath}`);
     expect(log).toContain(`codesign\t--verify\t--deep\t--strict\t${helperAppPath}`);

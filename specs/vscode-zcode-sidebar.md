@@ -1,12 +1,12 @@
-# VS Code ZCode sidebar (MVP)
+# VS Code TinyZhuIDE sidebar (MVP)
 
 ## Product definition
 
-Install a ZCode extension in VS Code (or a VS Code-compatible shell such as Antigravity). The extension owns a sidebar chat surface. Local `zcode app-server --stdio` is the executing agent. This repository supplies the agent runtime and ZCode Protocol V4. The existing ZCode desktop three-pane shell is out of scope and must not be reshaped for this feature.
+Install a TinyZhuIDE extension in VS Code (or a VS Code-compatible shell such as Antigravity). The extension owns a sidebar chat surface. Local `zcode app-server --stdio` is the executing agent. This repository supplies the agent runtime and ZCode Protocol V4. The existing desktop three-pane shell is out of scope and must not be reshaped for this feature. Mac desktop branding lives in `specs/tinyzhu-ide-product.md`.
 
 ## Product rules
 
-- One Activity Bar / sidebar view named ZCode. Users open it from VS Code; they do not need the ZCode desktop app.
+- One Activity Bar / sidebar view named TinyZhuIDE. Users open it from VS Code; they do not need the desktop app.
 - Workspace folder path is the agent cwd and the `workspacePath` on V4 commands. Local MVP sets `workspaceKey` to the same path (identity key = `workspaceIdentity?.trim() || workspacePath`). Multi-root MVP uses the first folder only.
 - One `app-server --stdio` process per workspace folder key (`workspacePath`). Restart on folder change or process death.
 - Conversation truth lives in the CLI projection (`ConversationSnapshot` via topic frames). The extension keeps only draft text and optimistic pending overlays.

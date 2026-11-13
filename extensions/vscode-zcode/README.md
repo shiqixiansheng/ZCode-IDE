@@ -1,6 +1,6 @@
-# ZCode for VS Code
+# TinyZhuIDE for VS Code
 
-Antigravity-shaped chat sidebar that runs **local zcode** (`app-server --stdio`) instead of `agy` / Claude Code / Codex.
+Antigravity-shaped chat sidebar branded **TinyZhuIDE** that runs **local zcode** (`app-server --stdio`) instead of `agy` / Claude Code / Codex.
 
 ## Product shape
 

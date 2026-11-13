@@ -1,8 +1,8 @@
 {
   "name": "@zcode/desktop",
   "private": true,
-  "description": "ZCode Desktop App",
-  "author": "ZCode",
+  "description": "TinyZhuIDE Desktop App",
+  "author": "TinyZhu",
   "type": "module",
   "main": "out/main/index.js",
   "imports": {
@@ -139,5 +139,5 @@
     "wdio-electron-service": "^9.2.1",
     "webdriverio": "^9.27.0"
   },
-  "productName": "ZCode"
+  "productName": "TinyZhuIDE"
 }

@@ -1,9 +1,9 @@
 {
-  "name": "zcode",
-  "displayName": "ZCode",
-  "description": "Local ZCode agent sidebar for VS Code (Antigravity-shaped shell, zcode app-server backend).",
+  "name": "tinyzhu-ide",
+  "displayName": "TinyZhuIDE",
+  "description": "TinyZhuIDE agent sidebar for VS Code (Antigravity-shaped shell, local zcode app-server backend).",
   "version": "0.1.0",
-  "publisher": "zcode",
+  "publisher": "tinyzhu",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -15,7 +15,7 @@
       "activitybar": [
         {
           "id": "zcode",
-          "title": "ZCode",
+          "title": "TinyZhuIDE",
           "icon": "media/zcode.svg"
         }
       ]
@@ -32,15 +32,15 @@
     "commands": [
       {
         "command": "zcode.toggleChatFocus",
-        "title": "ZCode: Toggle Chat Focus"
+        "title": "TinyZhuIDE: Toggle Chat Focus"
       },
       {
         "command": "zcode.startNewConversation",
-        "title": "ZCode: New Conversation"
+        "title": "TinyZhuIDE: New Conversation"
       },
       {
         "command": "zcode.stopAgent",
-        "title": "ZCode: Stop Running Turn"
+        "title": "TinyZhuIDE: Stop Running Turn"
       }
     ],
     "keybindings": [
@@ -56,7 +56,7 @@
       }
     ],
     "configuration": {
-      "title": "ZCode",
+      "title": "TinyZhuIDE",
       "properties": {
         "zcode.agentEntry": {
           "type": "string",

@@ -25,10 +25,10 @@ describe("desktop product identity", () => {
   it("ZCODE_ENV=test 使用可与生产版并排安装的 Preview 身份", () => {
     expect(resolveDesktopProductIdentity({ ZCODE_ENV: "test" })).toEqual({
       flavor: "preview",
-      appId: "dev.zcode.app.preview",
-      productName: "ZCode Preview",
-      linuxExecutableName: "zcode-preview",
-      linuxPackageName: "zcode-preview",
+      appId: "app.tinyzhu.ide.preview",
+      productName: "TinyZhuIDE Preview",
+      linuxExecutableName: "tinyzhu-ide-preview",
+      linuxPackageName: "tinyzhu-ide-preview",
       cuaHelperInstallVariant: "preview",
     });
   });
@@ -56,7 +56,7 @@ describe("desktop product identity", () => {
     }
   });
 
-  it("测试后端永远是 Preview 身份，开关无法把它变成正式 ZCode", () => {
+  it("测试后端永远是 Preview 身份，开关无法把它变成正式 TinyZhuIDE", () => {
     expect(resolveDesktopProductFlavor({ ZCODE_ENV: "test", ZCODE_PREVIEW_IDENTITY: "0" })).toBe(
       "preview",
     );
@@ -80,10 +80,10 @@ describe("desktop product identity", () => {
     );
     expect(desktopProductIdentities.production).toEqual({
       flavor: "production",
-      appId: "dev.zcode.app",
-      productName: "ZCode",
-      linuxExecutableName: "zcode",
-      linuxPackageName: "zcode",
+      appId: "app.tinyzhu.ide",
+      productName: "TinyZhuIDE",
+      linuxExecutableName: "tinyzhu-ide",
+      linuxPackageName: "tinyzhu-ide",
       cuaHelperInstallVariant: null,
     });
   });

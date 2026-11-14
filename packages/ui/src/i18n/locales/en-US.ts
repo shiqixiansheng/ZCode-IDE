@@ -3718,6 +3718,7 @@ const enUS: Record<string, string> = {
   "settings.workspaceShellLayoutMode": "Workspace layout",
   "settings.workspaceShellLayoutMode.agentPrimary": "Agent centered",
   "settings.workspaceShellLayoutMode.ide": "IDE layout",
+  "workspace.ide.exitToAgentPrimary": "Back to tasks",
   "settings.workspaceShellLayoutMode.description":
     "Agent centered keeps the task list, conversation, and tool pane. IDE layout shows the file tree, a preview, and chat on the right.",
   "workspaceShell.idePreview.empty": "Open a file from the tree",

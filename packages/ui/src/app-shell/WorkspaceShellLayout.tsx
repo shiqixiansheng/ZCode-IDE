@@ -10,7 +10,7 @@ import type {
   PointerEvent as ReactPointerEvent,
 } from "react";
 import type { PanelImperativeHandle } from "react-resizable-panels";
-import { GripHorizontal, LoaderCircle } from "lucide-react";
+import { GripHorizontal, ListTodo, LoaderCircle } from "lucide-react";
 import { TID_APP_HEADER } from "@zcode/shared/test-ids";
 // 保活：workspace tab 真正关闭时，按 workspaceKey 回收 side pane terminal 的常驻 PTY/xterm。
 // 对称下侧 Terminal.tsx 的 openWorkspaceKeys 回收。
@@ -2743,11 +2743,12 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="h-7 px-2 text-ui-caption"
+                      className="h-7 gap-1 px-2 text-ui-caption"
                       data-testid="workspace-ide-exit-layout"
                       onClick={() => setWorkspaceShellLayoutMode("agent-primary")}
                     >
-                      {intl.formatMessage({ id: "settings.workspaceShellLayoutMode.agentPrimary" })}
+                      <ListTodo className="size-3.5 shrink-0" aria-hidden />
+                      {intl.formatMessage({ id: "workspace.ide.exitToAgentPrimary" })}
                     </Button>
                     <Button
                       type="button"

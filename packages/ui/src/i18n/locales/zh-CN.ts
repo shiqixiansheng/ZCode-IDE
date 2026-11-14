@@ -3475,6 +3475,7 @@ const zhCN: Record<string, string> = {
   "settings.workspaceShellLayoutMode": "工作区布局",
   "settings.workspaceShellLayoutMode.agentPrimary": "Agent 居中",
   "settings.workspaceShellLayoutMode.ide": "IDE 布局",
+  "workspace.ide.exitToAgentPrimary": "返回任务列表",
   "settings.workspaceShellLayoutMode.description":
     "Agent 居中是任务列表、对话和工具侧栏。IDE 布局是文件树、预览和右侧对话。",
   "workspaceShell.idePreview.empty": "从左侧文件树打开文件",

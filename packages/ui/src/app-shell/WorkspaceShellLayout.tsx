@@ -48,6 +48,7 @@ import { requestV4ComposerDraftWorkspaceTransfer } from "@/v4/composer/composerD
 import { ProjectComposerMenu, ProjectDirectoryProvider } from "@/project-sidebar/index.js";
 import { DesktopTopOverlay } from "@/DesktopTopOverlay.js";
 import { DesktopWindowFrame } from "@/DesktopWindowFrame.js";
+import { createMacWindowControlsLeftPaddingStyle } from "@/windowCaptionControls.js";
 import { WorkspacePluginPreview } from "@/workspace-plugin-preview/index.js";
 import { useIsOfficeMode } from "@/hooks/useInterfaceMode.js";
 import { GitBranchSwitcher } from "@/GitBranchSwitcher.js";
@@ -2737,18 +2738,16 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
             >
               {isIdeLayout ? (
                 <div className="flex h-full min-h-0 flex-col" data-testid="workspace-ide-explorer">
-                  {/* IDE 独占标题带：h-12 垂直居中对齐红绿灯；左侧用 overlay 同款安全区，不再叠 DesktopTopOverlay。 */}
                   <div
                     className={cn(
                       "flex h-12 shrink-0 items-center gap-1 border-b border-border pr-2 [app-region:drag] [&_button]:[app-region:no-drag]",
-                      // 避免 px-* 盖掉 style.paddingLeft；全屏时红绿灯贴边，只留 pl-3。
                       isMacDesktop ? (isMacFullscreen ? "pl-3" : undefined) : "pl-2",
                     )}
-                    style={
-                      isMacDesktop && !isMacFullscreen
-                        ? { paddingLeft: `${Math.round(macWindowControlsLeftPaddingPx)}px` }
-                        : undefined
-                    }
+                    style={createMacWindowControlsLeftPaddingStyle({
+                      isMacDesktop,
+                      isMacFullscreen,
+                      leftPaddingPx: macWindowControlsLeftPaddingPx,
+                    })}
                   >
                     <Button
                       type="button"
@@ -3264,7 +3263,6 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
             {sidePanePanel}
           </ResizablePanelGroup>
         </div>
-        {/* IDE 左栏已自带标题带；再叠 DesktopTopOverlay 会与退出/设置抢同一安全区。 */}
         {!isIdeLayout ? (
           <ScopedErrorBoundary
             scope="desktop-top-overlay"

@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 
+export const MACOS_WINDOW_CONTROLS_DEFAULT_LEFT_PADDING_PX = 96;
 export const WINDOWS_CAPTION_CONTROLS_DEFAULT_RIGHT_INSET_PX = 136;
 export const WINDOWS_CAPTION_CONTROLS_RIGHT_INSET_VAR =
   "var(--windows-caption-controls-right-inset)";
@@ -9,6 +10,23 @@ type WindowsCaptionControlsStyle = CSSProperties & {
   "--windows-caption-controls-right-inset": string;
   "--windows-caption-control-width": string;
 };
+
+export function createMacWindowControlsLeftPaddingStyle({
+  isMacDesktop,
+  isMacFullscreen,
+  leftPaddingPx,
+}: {
+  isMacDesktop?: boolean;
+  isMacFullscreen?: boolean;
+  leftPaddingPx?: number;
+}): Pick<CSSProperties, "paddingLeft"> | undefined {
+  if (!isMacDesktop || isMacFullscreen) return undefined;
+  const paddingPx =
+    typeof leftPaddingPx === "number" && Number.isFinite(leftPaddingPx) && leftPaddingPx > 0
+      ? Math.round(leftPaddingPx)
+      : MACOS_WINDOW_CONTROLS_DEFAULT_LEFT_PADDING_PX;
+  return { paddingLeft: `${paddingPx}px` };
+}
 
 export function createWindowsCaptionControlsStyle(
   _fallbackRightInsetPx = WINDOWS_CAPTION_CONTROLS_DEFAULT_RIGHT_INSET_PX,

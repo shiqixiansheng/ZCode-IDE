@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
+  <!-- Monochrome ribbon Z mark. Use currentColor / CSS fill. -->
+  <path
+    fill="currentColor"
+    fill-rule="evenodd"
+    d="M52 58c0-10 8-18 18-18h98c14 0 22 16 13 27l-8 11c-4 6-11 9-18 9H88v18h68c28 0 46 30 32 54L136 214c-4 6-11 10-18 10H52c-10 0-18-8-18-18s8-18 18-18h52l48-68H70c-10 0-18-8-18-18V58zm134 122c10 0 18 8 18 18s-8 18-18 18h-20c-7 0-14-4-18-10l-6-8h26z"
+  />
+  <circle cx="58" cy="78" r="10" fill="currentColor" opacity="0.85" />
+  <circle cx="198" cy="178" r="10" fill="currentColor" opacity="0.85" />
+</svg>

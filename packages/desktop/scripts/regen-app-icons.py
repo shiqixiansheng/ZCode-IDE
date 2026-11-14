@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Regenerate packages/desktop/build icon assets as a BakedWhiteSquircleMaster.
+"""Regenerate packages/desktop/build icon assets.
 
-Data shape: BakedWhiteSquircleMaster. Bake an opaque white squircle card into
-the 1024 PNG with transparent corners; composite the robot mark inside the card.
-Do not rely on a full-bleed opaque white square for Dock masking.
+Default: FullPlateSquircleMaster from build/icon-plate.png — full-color plate
+clipped to a Dock squircle with transparent corners.
+
+Legacy: BakedWhiteSquircleMaster via --white-card-mark / icon-mark.png — bake an
+opaque white squircle card and composite a mark inside. Do not rely on a
+full-bleed opaque white square for Dock masking.
 """
 
 from __future__ import annotations
@@ -247,20 +250,41 @@ def write_icns(master: Image.Image, path: Path) -> None:
 def resolve_source(cli_source: Path | None, build: Path) -> Path:
     if cli_source is not None:
         return cli_source
+    # Prefer a baked full-plate master when present so regen does not
+    # accidentally rebuild the legacy white-card robot mark.
+    plate = build / "icon-plate.png"
+    if plate.is_file():
+        return plate
     mark = build / "icon-mark.png"
     if mark.is_file():
         return mark
     raise SystemExit(
-        "pass a source image, or place packages/desktop/build/icon-mark.png"
+        "pass a source image, or place packages/desktop/build/icon-plate.png "
+        "/ icon-mark.png"
     )
+
+
+def is_full_plate_source(source: Path, full_plate_flag: bool) -> bool:
+    if full_plate_flag:
+        return True
+    name = source.name.lower()
+    return name in {"icon-plate.png", "zcode-app-icon.png"} or name.endswith(
+        "-plate.png"
+    )
+
+
+def compose_full_plate_master(img: Image.Image) -> Image.Image:
+    """Full-color plate clipped to the same Dock squircle (transparent corners)."""
+    return clip_rgba_to_mask(img, squircle_mask(CANVAS))
 
 
 def main() -> None:
     build_default = Path(__file__).resolve().parents[1] / "build"
     parser = argparse.ArgumentParser(
         description=(
-            "Build BakedWhiteSquircleMaster icons for Dock "
-            "(white squircle baked into PNG; transparent corners)."
+            "Build desktop app icons for Dock. Default prefers icon-plate.png "
+            "(full-color plate + transparent squircle corners). Legacy mark mode "
+            "bakes a white squircle around icon-mark.png."
         )
     )
     parser.add_argument(
@@ -268,25 +292,45 @@ def main() -> None:
         type=Path,
         nargs="?",
         default=None,
-        help="RGBA mark or white-card JPEG; default: build/icon-mark.png if present",
+        help="Source image; default: build/icon-plate.png, else icon-mark.png",
     )
     parser.add_argument(
         "--build-dir",
         type=Path,
         default=build_default,
     )
+    parser.add_argument(
+        "--full-plate",
+        action="store_true",
+        help="Treat source as a complete icon plate (no white-card mark composite)",
+    )
+    parser.add_argument(
+        "--white-card-mark",
+        action="store_true",
+        help="Force legacy BakedWhiteSquircleMaster from a mark/JPEG source",
+    )
     args = parser.parse_args()
 
     build = args.build_dir
     source = resolve_source(args.source, build)
-    mark = prepare_mark(load_rgba(source))
-    master = compose_baked_white_squircle(mark)
+    rgba = load_rgba(source)
+    use_full_plate = (not args.white_card_mark) and is_full_plate_source(
+        source, args.full_plate
+    )
+    if use_full_plate:
+        master = compose_full_plate_master(rgba)
+        mode = "FullPlateSquircleMaster"
+    else:
+        master = compose_baked_white_squircle(prepare_mark(rgba))
+        mode = "BakedWhiteSquircleMaster"
     icons = build / "icons"
 
     write_png(master, build / "icon-source.png", CANVAS)
     write_png(master, build / "icon.png", CANVAS)
     write_png(master, build / "icon_windows.png", CANVAS)
     write_png(master, build / "icon_installer.png", CANVAS)
+    if use_full_plate:
+        write_png(master, build / "icon-plate.png", CANVAS)
     for size in PNG_SIZES:
         write_png(master, icons / f"{size}x{size}.png", size)
 
@@ -295,7 +339,7 @@ def main() -> None:
     write_icns(master, build / "icon.icns")
     write_icns(master, build / "icon_installer.icns")
 
-    print(f"regenerated BakedWhiteSquircleMaster icons in {build} from {source}")
+    print(f"regenerated {mode} icons in {build} from {source}")
 
 
 if __name__ == "__main__":

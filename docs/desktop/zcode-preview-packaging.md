@@ -251,7 +251,7 @@ workflow path selection
 | 身份推导 | `flavor = ZCODE_PREVIEW_IDENTITY 为真 \|\| ZCODE_ENV=test ? preview : production` | 测试后端永远是 Preview，开关无法把测试后端包变成正式 `ZCode` |
 | 身份含义 | 整套 Preview 身份，不是只改显示名 | appId `dev.zcode.app.preview`、`ZCode Preview` 应用名、独立 Electron `userData`、Linux `zcode-preview`、Helper 安装子目录 `computer-use/preview`、Windows AUMID |
 | 更新 | Preview 身份在两种后端下都禁用 updater / 强更 / 菜单与标题栏更新入口 | stable feed 上只有正式 `ZCode` 安装包，装到 Preview bundle 上等于再装一份正式版 |
-| 产物后缀 | `_TEST` 只标记 `ZCODE_ENV=test`；生产后端的 Preview 没有后缀 | 生产 Preview 靠 productName 区分：`ZCode Preview-<version>-mac-arm64.dmg` vs `ZCode-<version>-mac-arm64.dmg` |
+| 产物后缀 | `_TEST` 只标记 `ZCODE_ENV=test`；生产后端的 Preview 没有后缀 | 生产 Preview 靠 productName 区分：`Tiny Zcode IDE Preview-<version>-mac-arm64.dmg` vs `Tiny Zcode IDE-<version>-mac-arm64.dmg` |
 | 发布链路 | `ZCODE_PREVIEW_IDENTITY == "1"` 与 `ZCODE_ENV == "test"` 同等对待：所有 release job `when: never`，`publish-release.sh` 硬拦截 | 生产后端的 Preview 仍是内部包 |
 | CUA Helper | 不改 | app id 仍是 `dev.zcode.app.preview`，Helper 的 launcher allowlist 已接受 |
 

@@ -45,6 +45,7 @@ import {
   parseAsarListWithPackState,
 } from "./scripts/desktop-native-package-policy.mjs";
 import { replaceAppAsarFromStaging } from "./scripts/app-asar-repack.mjs";
+import { applyDeepAdhocCodesignIfNeeded } from "./scripts/macos-adhoc-codesign.mjs";
 import {
   patchNsisInstallSectionFile,
   patchNsisInstallUtilFile,
@@ -797,6 +798,19 @@ export default {
       runTimedSync("afterPack:signWindowsBrowserImportHelper", () =>
         signWindowsHelper(context, `browser-import/${HELPER_FILENAME}`),
       );
+    }
+    // 本地未开 Developer ID 时 electron-builder identity=null，产物只有 linker-signed stub。
+    // 带 quarantine 从 DMG/下载目录打开会进 App Translocation，进程卡在 dyld、Dock 有点无窗。
+    // 这里补深度 ad-hoc 签名；不是公证，正式发布仍走 ZCODE_ENABLE_MAC_SIGN。
+    if (context.electronPlatformName === "darwin" && !shouldEnableMacSigning) {
+      runTimedSync("afterPack:deepAdhocCodesign", () => {
+        const result = applyDeepAdhocCodesignIfNeeded(context, { enabled: true });
+        if (result.applied) {
+          console.log(
+            `[afterPack] applied deep ad-hoc codesign (unsigned local build): ${result.appPath}`,
+          );
+        }
+      });
     }
   },
   afterSign: async (context) => {

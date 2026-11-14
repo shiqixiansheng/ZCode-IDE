@@ -87,6 +87,7 @@
   "packages/desktop/test/genUiPresentationClipboard.test.ts",
   "packages/desktop/test/highspeedE2EMockEnv.test.ts",
   "packages/desktop/test/macElectronLocales.test.ts",
+  "packages/desktop/test/macosAdhocCodesign.test.ts",
   "packages/desktop/test/macosReleaseAppDoctor.test.ts",
   "packages/desktop/test/macosUpdateManifest.test.ts",
   "packages/desktop/test/mcpAppsHostRunner.test.ts",

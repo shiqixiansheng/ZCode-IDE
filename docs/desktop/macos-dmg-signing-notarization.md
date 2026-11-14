@@ -12,6 +12,18 @@ macOS release DMG 是用户从浏览器下载后直接交给 Gatekeeper 评估�
 - 最终 `ZCode.app` 及其包内 Helper、安装后的用户级 Helper 必须分别通过 `codesign --verify --deep --strict` 和 `spctl -a -vv -t exec` 验收；两个 Helper 还必须通过本地 `xcrun stapler validate`，确认签名未被重新覆盖后 staple 仍对应最终 bundle。
 - 正式 tag 发布禁止上传 `.unnotarized.dmg`；测试、sandbox 和 MR 链路可以保留未公证产物用于排查，但不得进入正式 release。
 
+## 本地未签名包的 ad-hoc 兜底
+
+当 `ZCODE_ENABLE_MAC_SIGN` 未打开或没有 Developer ID 身份时，electron-builder 的 `mac.identity` 为 `null`，产物只剩 linker-signed stub。bundle 身份会显示成 `Electron`，Dock / 诊断更难对齐产品名。
+
+`packages/desktop/electron-builder.config.js` 的 `afterPack` 在 darwin 且未启用正式签名时，必须对打包出的 `.app` 执行深度 ad-hoc 签名（`codesign --force --deep --sign -`，见 `packages/desktop/scripts/macos-adhoc-codesign.mjs`），让本地包至少带上正确的 bundle id 签名。这不能替代 Developer ID，也不能替代公证。
+
+带 Chrome/Safari quarantine 的本地包若从 DMG 或下载目录直接 `open`，系统会走 App Translocation；未公证包可能卡在 `_dyld_start`（RSS 约 96KB），Dock 有运行点但没有窗口。验收与分发说明必须要求用户先拖到 `/Applications` 再打开；若已出现无窗口的 Dock 点，先强制退出该进程再从应用程序文件夹启动。正式对外分发仍必须走 Developer ID + notarization。
+
+## Dock 图标透明底
+
+macOS Dock / `app.dock.setIcon` 使用的 `icon.icns` / `icon.png` 不能是不透明白底 JPEG。白底卡片在 Dock 里会显示成白方块。生成脚本 `packages/desktop/scripts/regen-app-icons.py` 必须把近白像素打成透明后再写出 icns/png。
+
 ## CI 流程
 
 1. `build:macos:*` 导入 Developer ID Application p12 到临时 keychain。

@@ -20,9 +20,13 @@ macOS release DMG 是用户从浏览器下载后直接交给 Gatekeeper 评估�
 
 带 Chrome/Safari quarantine 的本地包若从 DMG 或下载目录直接 `open`，系统会走 App Translocation；未公证包可能卡在 `_dyld_start`（RSS 约 96KB），Dock 有运行点但没有窗口。验收与分发说明必须要求用户先拖到 `/Applications` 再打开；若已出现无窗口的 Dock 点，先强制退出该进程再从应用程序文件夹启动。正式对外分发仍必须走 Developer ID + notarization。
 
-## Dock 图标透明底
+## Dock 图标白底方卡
 
-macOS Dock / `app.dock.setIcon` 使用的 `icon.icns` / `icon.png` 不能是不透明白底 JPEG。白底卡片在 Dock 里会显示成白方块。生成脚本 `packages/desktop/scripts/regen-app-icons.py` 必须把近白像素打成透明后再写出 icns/png。
+Dock 邻居（WPS / WeCom / Edge / Typora）是白底圆角方卡。ZCode 的 master 做成 **BakedWhiteSquircleMaster**：把不透明白底 squircle **烤进** 1024 PNG，画布四角透明（α=0），不依赖满铺不透明白方再交给系统裁切。
+
+- 设计输入：`packages/desktop/build/icon-mark.png`（仅机器人 RGBA，透明底）。
+- 生成脚本：`packages/desktop/scripts/regen-app-icons.py` 用 Lamé 超椭圆（`SQUIRCLE_N=5`，`CARD_INSET_FRAC≈1.5%`）生成白卡 mask，把 mark 相对白卡居中（约 68% 宽，侧边留白约 16%），软投影裁在卡内；写出 `icon-source.png` / `icon.png` / icns 等。
+- **不要**对最终白底 master 做边缘 flood-fill knockout；那样会挖掉整张白卡。knockout 只用于从误传的白底 JPEG 里抠出 mark。
 
 ## CI 流程
 

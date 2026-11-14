@@ -2737,8 +2737,19 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
             >
               {isIdeLayout ? (
                 <div className="flex h-full min-h-0 flex-col" data-testid="workspace-ide-explorer">
-                  {/* IDE 换掉任务侧栏后，布局回退与设置入口必须留在文件树顶栏。 */}
-                  <div className="flex shrink-0 items-center gap-1 border-b border-border px-2 py-1.5">
+                  {/* IDE 独占标题带：h-12 垂直居中对齐红绿灯；左侧用 overlay 同款安全区，不再叠 DesktopTopOverlay。 */}
+                  <div
+                    className={cn(
+                      "flex h-12 shrink-0 items-center gap-1 border-b border-border pr-2 [app-region:drag] [&_button]:[app-region:no-drag]",
+                      // 避免 px-* 盖掉 style.paddingLeft；全屏时红绿灯贴边，只留 pl-3。
+                      isMacDesktop ? (isMacFullscreen ? "pl-3" : undefined) : "pl-2",
+                    )}
+                    style={
+                      isMacDesktop && !isMacFullscreen
+                        ? { paddingLeft: `${Math.round(macWindowControlsLeftPaddingPx)}px` }
+                        : undefined
+                    }
+                  >
                     <Button
                       type="button"
                       variant="ghost"
@@ -3253,41 +3264,44 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
             {sidePanePanel}
           </ResizablePanelGroup>
         </div>
-        <ScopedErrorBoundary
-          scope="desktop-top-overlay"
-          resetKeys={workspaceSidebarVisibilityResetKeys}
-          variant="silent"
-        >
-          <DesktopTopOverlay
-            newTaskDisabledReason={workspaceReadOnlyReason}
-            workspaceAbsPath={workspaceAbsPath}
-            isMacDesktop={isMacDesktop}
-            isMacFullscreen={isMacFullscreen}
-            macWindowControlsLeftPaddingPx={macWindowControlsLeftPaddingPx}
-            windowsWindowControlsRightPaddingPx={windowsWindowControlsRightPaddingPx}
-            isWindowsDesktop={isWindowsDesktop}
-            isDesktop={isDesktop}
-            isSidebarVisible={isSidebarVisible}
-            updateReadyVersion={updateReadyVersion}
-            updateState={updateState}
-            toggleSidebarShortcutLabel={toggleSidebarShortcutLabel}
-            newTaskShortcutLabel={newTaskShortcutLabel}
-            goBackShortcutLabel={goBackShortcutLabel}
-            goForwardShortcutLabel={goForwardShortcutLabel}
-            canTaskNavBack={canPrimaryNavigationBack}
-            canTaskNavForward={canTaskNavForward}
-            canGoBack={canGoBack}
-            canGoForward={canGoForward}
-            showNewTaskButton={showTopOverlayNewTaskButton}
-            appLogoUrl={appLogoUrl}
-            platform={platform}
-            onToggleSidebar={handleToggleSidebar}
-            onCreateTask={handleCreateTaskInChat}
-            onGoBack={primaryNavigationBack}
-            onGoForward={handleTaskNavForward}
-            hideTaskNavigationButtons={simplifyHeaderForNarrowRemote}
-          />
-        </ScopedErrorBoundary>
+        {/* IDE 左栏已自带标题带；再叠 DesktopTopOverlay 会与退出/设置抢同一安全区。 */}
+        {!isIdeLayout ? (
+          <ScopedErrorBoundary
+            scope="desktop-top-overlay"
+            resetKeys={workspaceSidebarVisibilityResetKeys}
+            variant="silent"
+          >
+            <DesktopTopOverlay
+              newTaskDisabledReason={workspaceReadOnlyReason}
+              workspaceAbsPath={workspaceAbsPath}
+              isMacDesktop={isMacDesktop}
+              isMacFullscreen={isMacFullscreen}
+              macWindowControlsLeftPaddingPx={macWindowControlsLeftPaddingPx}
+              windowsWindowControlsRightPaddingPx={windowsWindowControlsRightPaddingPx}
+              isWindowsDesktop={isWindowsDesktop}
+              isDesktop={isDesktop}
+              isSidebarVisible={isSidebarVisible}
+              updateReadyVersion={updateReadyVersion}
+              updateState={updateState}
+              toggleSidebarShortcutLabel={toggleSidebarShortcutLabel}
+              newTaskShortcutLabel={newTaskShortcutLabel}
+              goBackShortcutLabel={goBackShortcutLabel}
+              goForwardShortcutLabel={goForwardShortcutLabel}
+              canTaskNavBack={canPrimaryNavigationBack}
+              canTaskNavForward={canTaskNavForward}
+              canGoBack={canGoBack}
+              canGoForward={canGoForward}
+              showNewTaskButton={showTopOverlayNewTaskButton}
+              appLogoUrl={appLogoUrl}
+              platform={platform}
+              onToggleSidebar={handleToggleSidebar}
+              onCreateTask={handleCreateTaskInChat}
+              onGoBack={primaryNavigationBack}
+              onGoForward={handleTaskNavForward}
+              hideTaskNavigationButtons={simplifyHeaderForNarrowRemote}
+            />
+          </ScopedErrorBoundary>
+        ) : null}
 
         {isWebRemoteControlShell && isWebRemoteControlTaskSwitching ? (
           <div

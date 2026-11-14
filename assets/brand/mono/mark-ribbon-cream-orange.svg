@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
+  <!-- Flat brand mark: cream ribbon + orange accents (no plate). -->
+  <path
+    fill="#F5F0E6"
+    d="M48 52c0-8 6-14 14-14h104c12 0 19 14 11 23l-10 14c-3 5-9 8-15 8H78v22h72c24 0 39 26 27 47L122 210c-3 5-9 8-15 8H48c-8 0-14-6-14-14s6-14 14-14h56l52-74H62c-8 0-14-6-14-14V52z"
+  />
+  <path
+    fill="#FF6A1A"
+    d="M168 66c6-8 2-18-8-18h-4l12 18h0zm-92 92 52 74c6 8 18 6 24-2l-48-68H76z"
+    opacity="0.9"
+  />
+  <circle cx="56" cy="72" r="9" fill="#FF6A1A" />
+  <circle cx="200" cy="184" r="9" fill="#FF6A1A" />
+</svg>

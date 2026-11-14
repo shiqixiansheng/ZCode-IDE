@@ -36,6 +36,46 @@ def load_rgba(source: Path) -> Image.Image:
     return img
 
 
+def _is_near_white(pixel: tuple[int, int, int, int], threshold: int) -> bool:
+    r, g, b, _a = pixel
+    if r >= threshold and g >= threshold and b >= threshold:
+        return True
+    # Soft card edges / drop-shadow are slightly tinted off-white below the hard threshold.
+    value = max(r, g, b)
+    chroma = value - min(r, g, b)
+    return value >= threshold - 20 and chroma <= 24
+
+
+def knockout_near_white(img: Image.Image, threshold: int = 235) -> Image.Image:
+    """Flood-fill near-white from the canvas edge so Dock icons are not white cards.
+
+    Edge flood-fill keeps interior whites (robot face plate) while clearing the
+    outer card, padding, and soft drop-shadow connected to the border.
+    """
+    pixels = img.load()
+    width, height = img.size
+    visited = [[False] * width for _ in range(height)]
+    stack: list[tuple[int, int]] = []
+    for x in range(width):
+        stack.append((x, 0))
+        stack.append((x, height - 1))
+    for y in range(height):
+        stack.append((0, y))
+        stack.append((width - 1, y))
+
+    while stack:
+        x, y = stack.pop()
+        if x < 0 or y < 0 or x >= width or y >= height or visited[y][x]:
+            continue
+        visited[y][x] = True
+        pixel = pixels[x, y]
+        if not _is_near_white(pixel, threshold):
+            continue
+        pixels[x, y] = (pixel[0], pixel[1], pixel[2], 0)
+        stack.extend(((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)))
+    return img
+
+
 def write_png(img: Image.Image, path: Path, size: int) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     img.resize((size, size), Image.Resampling.LANCZOS).save(path, "PNG")
@@ -93,10 +133,12 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    master = load_rgba(args.source)
+    master = knockout_near_white(load_rgba(args.source))
     build = args.build_dir
     icons = build / "icons"
 
+    # Transparent PNG master for Dock / applyAppIcon; keep JPEG source as design input only.
+    write_png(master, build / "icon-source.png", 1024)
     write_png(master, build / "icon.png", 1024)
     write_png(master, build / "icon_windows.png", 1024)
     write_png(master, build / "icon_installer.png", 1024)

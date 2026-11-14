@@ -2740,8 +2740,13 @@ const WorkspaceShellLayoutContent = memo(function WorkspaceShellLayoutComponent(
                 <div className="flex h-full min-h-0 flex-col" data-testid="workspace-ide-explorer">
                   <div
                     className={cn(
-                      "flex h-12 shrink-0 items-center gap-1 border-b border-border pr-2 [app-region:drag] [&_button]:[app-region:no-drag]",
-                      isMacDesktop ? (isMacFullscreen ? "pl-3" : undefined) : "pl-2",
+                      "flex shrink-0 items-center gap-1 border-b border-border pr-2 [app-region:drag] [&_button]:[app-region:no-drag]",
+                      isMacDesktop ? "h-14" : "h-12",
+                      isMacDesktop
+                        ? isMacFullscreen
+                          ? "pl-3 pt-1"
+                          : "pt-1"
+                        : "pl-2",
                     )}
                     style={createMacWindowControlsLeftPaddingStyle({
                       isMacDesktop,

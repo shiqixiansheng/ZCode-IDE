@@ -13,6 +13,7 @@ import { UpdateStatusButton } from "@/UpdateStatusButton.js";
 import { DesktopTopOverlayActionButton } from "@/DesktopTopOverlayActionButton.js";
 import { ZCodeStartupLogoBadge } from "@/root/RootStartupLoading.js";
 import {
+  createMacWindowControlsLeftPaddingStyle,
   createWindowsCaptionControlsStyle,
   WINDOWS_CAPTION_CONTROLS_RIGHT_INSET_VAR,
 } from "@/windowCaptionControls.js";
@@ -87,10 +88,11 @@ export function DesktopTopOverlay({
   const taskBackTitle = intl.formatMessage({ id: "taskNav.back" });
   const taskForwardTitle = intl.formatMessage({ id: "taskNav.forward" });
   const isNewTaskButtonVisible = showNewTaskButton ?? !isSidebarVisible;
-  const macTopOverlayPaddingStyle =
-    isMacDesktop && !isMacFullscreen && Number.isFinite(macWindowControlsLeftPaddingPx)
-      ? { paddingLeft: `${Math.round(macWindowControlsLeftPaddingPx ?? 96)}px` }
-      : undefined;
+  const macTopOverlayPaddingStyle = createMacWindowControlsLeftPaddingStyle({
+    isMacDesktop,
+    isMacFullscreen,
+    leftPaddingPx: macWindowControlsLeftPaddingPx,
+  });
   const windowsTopOverlayPaddingStyle = isWindowsDesktop
     ? {
         ...createWindowsCaptionControlsStyle(windowsWindowControlsRightPaddingPx),

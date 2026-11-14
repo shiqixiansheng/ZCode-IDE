@@ -40,13 +40,15 @@ SHADOW_ALPHA_SCALE = 0.16
 SHADOW_BLUR = 18
 SHADOW_Y_OFFSET = 10
 
-# Squircle card geometry (non-obvious why — Dock parity with WPS/Edge white cards):
-# CARD_INSET_FRAC ~1.5% leaves transparent fringe so LANCZOS mipmaps don't smear
-# opaque white into the four canvas corners.
+# Squircle card geometry (non-obvious why — Dock peer size vs WPS/Edge/Typora):
+# CARD_INSET_FRAC=0.08 → card ~84% of canvas. System-masked neighbor tiles keep a
+# larger effective margin; a ~97% fill (1.5% inset) reads one Dock size larger.
+# The transparent fringe also keeps LANCZOS mipmaps from smearing opaque white
+# into the four canvas corners.
 # SQUIRCLE_N=5 is a Lamé superellipse (n=2 ellipse, n→∞ square); n≈5 matches
 # macOS continuous-corner Dock cards better than a plain rounded-rect.
 # MASK_SUPERSAMPLE=2 hard-rasters then downscales for soft AA on the rim.
-CARD_INSET_FRAC = 0.015
+CARD_INSET_FRAC = 0.08
 SQUIRCLE_N = 5.0
 MASK_SUPERSAMPLE = 2
 

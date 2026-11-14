@@ -17,13 +17,14 @@ Electron bundle 的 `Info.plist` 没有 `CFBundleURLTypes`，系统登记后得�
 
 ## 方案
 
-仅在 macOS Dev 启动脚本中准备一个本地 `ZCode Dev.app` bundle：
+仅在 macOS Dev 启动脚本中准备一个本地 `Tiny Zcode IDE Dev.app` bundle：
 
 1. 以当前 checkout 的 Electron runtime 为源，在 `.codex-runtime/desktop-dev/` 下准备副本。
 2. 只修改副本的 `Info.plist`，写入：
    - `CFBundleIdentifier=dev.zcode.app.development`；
-   - `CFBundleName/CFBundleDisplayName=ZCode Dev`；
-   - `CFBundleURLTypes` 中的 `zcode` scheme。
+   - `CFBundleName/CFBundleDisplayName=Tiny Zcode IDE Dev`；
+   - `CFBundleURLTypes` 中的 `zcode` scheme；
+   - 用 `build/icon.icns` 覆盖 `Contents/Resources/electron.icns`。
 3. 仍以 `packages/desktop` 目录作为 Electron 的开发入口启动副本，保留 Vite、HMR、
    `ELECTRON_RENDERER_URL`、`ZCODE_ENV` 和现有单实例锁语义。
 4. 现有 main process 继续调用 `registerDeepLinkProtocol`；由于当前进程已经来自带
@@ -35,7 +36,7 @@ Electron bundle 的 `Info.plist` 没有 `CFBundleURLTypes`，系统登记后得�
 ```text
 pnpm dev:desktop:test
   -> dev.mjs 等待 main/host/preload/Vite 就绪
-  -> 准备 ZCode Dev.app + Info.plist(zcode)
+  -> 准备 Tiny Zcode IDE Dev.app + Info.plist(zcode) + icon.icns
   -> 从 Dev.app 启动 Electron packages/desktop
   -> main 注册 zcode 默认 handler
   -> 浏览器点击 zcode://share/import?code=...

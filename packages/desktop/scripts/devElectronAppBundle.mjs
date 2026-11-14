@@ -1,14 +1,16 @@
 import { access, cp, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, posix } from "node:path";
+import { fileURLToPath } from "node:url";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
 export const DEV_ELECTRON_PROTOCOL_SCHEME = "zcode";
-export const DEV_ELECTRON_APP_NAME = "ZCode Dev";
+export const DEV_ELECTRON_APP_NAME = "Tiny Zcode IDE Dev";
 export const DEV_ELECTRON_APP_BUNDLE_ID = "dev.zcode.app.development";
 // 副本布局版本，见 prepareDevElectronAppBundle 中的指纹说明。
-export const DEV_ELECTRON_BUNDLE_FORMAT = 3;
+export const DEV_ELECTRON_BUNDLE_FORMAT = 4;
 const execFileAsync = promisify(execFile);
+const DEV_APP_ICON_ICNS = fileURLToPath(new URL("../build/icon.icns", import.meta.url));
 
 async function signDevElectronApp(appPath) {
   // Electron 42 起通知要求有效签名；原 npm runtime 签名可能不完整，修改身份后也必须重签。
@@ -125,6 +127,10 @@ export async function prepareDevElectronAppBundle({
     await cp(electronAppPath, appPath, { recursive: true, verbatimSymlinks: true });
     const patchedInfoPlist = patchDevElectronInfoPlist(await readFile(infoPlistPath, "utf8"));
     await writeFile(infoPlistPath, patchedInfoPlist, "utf8");
+    // Dock / Finder 使用 bundle 内 electron.icns；运行时 applyAppIcon 另设 PNG，但未启动时仍靠这里。
+    const resourcesDir = posix.join(appPath, "Contents", "Resources");
+    await mkdir(resourcesDir, { recursive: true });
+    await cp(DEV_APP_ICON_ICNS, posix.join(resourcesDir, "electron.icns"));
     await signApp(appPath);
     // 指纹最后写：中途失败时下次仍会判定为需要重拷，不会留下半成品缓存。
     if (sourceStamp !== undefined) await writeFile(sourceStampPath, sourceStamp, "utf8");

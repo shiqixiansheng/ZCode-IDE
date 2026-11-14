@@ -22,10 +22,10 @@ macOS release DMG 是用户从浏览器下载后直接交给 Gatekeeper 评估�
 
 ## Dock 图标白底方卡
 
-Dock 邻居（WPS / WeCom / Edge / Typora）是白底圆角方卡。ZCode 的 master 也做成**不透明白底 1024² 方图**，再由 macOS 裁成 squircle。
+Dock 邻居（WPS / WeCom / Edge / Typora）是白底圆角方卡。ZCode 的 master 做成 **BakedWhiteSquircleMaster**：把不透明白底 squircle **烤进** 1024 PNG，画布四角透明（α=0），不依赖满铺不透明白方再交给系统裁切。
 
 - 设计输入：`packages/desktop/build/icon-mark.png`（仅机器人 RGBA，透明底）。
-- 生成脚本：`packages/desktop/scripts/regen-app-icons.py` 把 mark 居中贴到不透明白底上（约 68% 宽，侧边留白约 16%），写出 `icon-source.png` / `icon.png` / icns 等。
+- 生成脚本：`packages/desktop/scripts/regen-app-icons.py` 用 Lamé 超椭圆（`SQUIRCLE_N=5`，`CARD_INSET_FRAC≈1.5%`）生成白卡 mask，把 mark 相对白卡居中（约 68% 宽，侧边留白约 16%），软投影裁在卡内；写出 `icon-source.png` / `icon.png` / icns 等。
 - **不要**对最终白底 master 做边缘 flood-fill knockout；那样会挖掉整张白卡。knockout 只用于从误传的白底 JPEG 里抠出 mark。
 
 ## CI 流程

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Regenerate packages/desktop/build icon assets as an OpaqueWhiteSquareMaster.
+"""Regenerate packages/desktop/build icon assets as a BakedWhiteSquircleMaster.
 
-Data shape: OpaqueWhiteSquareMaster. Composite the robot mark onto a fully
-opaque white 1024x1024 PNG. macOS Dock masks the square to a squircle; do not
-flood-fill-knockout the white card after compositing.
+Data shape: BakedWhiteSquircleMaster. Bake an opaque white squircle card into
+the 1024 PNG with transparent corners; composite the robot mark inside the card.
+Do not rely on a full-bleed opaque white square for Dock masking.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from PIL import Image, ImageFilter
+from PIL import Image, ImageChops, ImageFilter
 
 ICONSET_ENTRIES = [
     ("icon_16x16.png", 16),
@@ -33,12 +33,22 @@ ICONSET_ENTRIES = [
 PNG_SIZES = (16, 24, 32, 48, 64, 128, 256, 512, 1024)
 ICO_SIZES = (16, 24, 32, 48, 64, 128, 256)
 
-# Mark width relative to canvas (~16% side inset). Interior face-plate whites stay.
+# Mark width relative to card (~16% side inset inside the white face).
 MARK_SCALE = 0.68
 CANVAS = 1024
 SHADOW_ALPHA_SCALE = 0.16
 SHADOW_BLUR = 18
 SHADOW_Y_OFFSET = 10
+
+# Squircle card geometry (non-obvious why — Dock parity with WPS/Edge white cards):
+# CARD_INSET_FRAC ~1.5% leaves transparent fringe so LANCZOS mipmaps don't smear
+# opaque white into the four canvas corners.
+# SQUIRCLE_N=5 is a Lamé superellipse (n=2 ellipse, n→∞ square); n≈5 matches
+# macOS continuous-corner Dock cards better than a plain rounded-rect.
+# MASK_SUPERSAMPLE=2 hard-rasters then downscales for soft AA on the rim.
+CARD_INSET_FRAC = 0.015
+SQUIRCLE_N = 5.0
+MASK_SUPERSAMPLE = 2
 
 
 def load_rgba(source: Path) -> Image.Image:
@@ -60,7 +70,7 @@ def _is_near_white(pixel: tuple[int, int, int, int], threshold: int) -> bool:
 def knockout_near_white(img: Image.Image, threshold: int = 235) -> Image.Image:
     """Isolate a mark from accidental opaque white JPEG/card inputs only.
 
-    Never run this on the final OpaqueWhiteSquareMaster. Edge flood-fill keeps
+    Never run this on the final BakedWhiteSquircleMaster. Edge flood-fill keeps
     interior whites (robot face plate) while clearing border-connected white.
     """
     pixels = img.load()
@@ -111,7 +121,7 @@ def prepare_mark(img: Image.Image) -> Image.Image:
 
 
 def soft_contact_shadow(mark: Image.Image) -> Image.Image:
-    """Very soft silhouette shadow under the mark; stays inside the white card."""
+    """Very soft silhouette shadow under the mark; clipped to the white card later."""
     alpha = mark.getchannel("A")
     soft = alpha.point(lambda a: int(a * SHADOW_ALPHA_SCALE) if a else 0)
     shadow = Image.merge(
@@ -126,26 +136,63 @@ def soft_contact_shadow(mark: Image.Image) -> Image.Image:
     return shadow.filter(ImageFilter.GaussianBlur(radius=SHADOW_BLUR))
 
 
-def compose_opaque_white_square(mark: Image.Image) -> Image.Image:
-    """OpaqueWhiteSquareMaster: white card + centered mark (~68% width)."""
-    target_w = max(1, int(round(CANVAS * MARK_SCALE)))
+def squircle_mask(size: int) -> Image.Image:
+    """Luminance mask: 255 inside the card, 0 outside (transparent canvas corners)."""
+    ss = MASK_SUPERSAMPLE
+    hi = size * ss
+    inset = hi * CARD_INSET_FRAC
+    half = (hi - 2 * inset) / 2.0
+    cx = cy = hi / 2.0
+    n = SQUIRCLE_N
+    hard = Image.new("L", (hi, hi), 0)
+    px = hard.load()
+    for y in range(hi):
+        ny = abs((y + 0.5 - cy) / half)
+        if ny > 1.0:
+            continue
+        ny_n = ny**n
+        for x in range(hi):
+            nx = abs((x + 0.5 - cx) / half)
+            if nx > 1.0:
+                continue
+            if nx**n + ny_n <= 1.0:
+                px[x, y] = 255
+    if ss == 1:
+        return hard
+    return hard.resize((size, size), Image.Resampling.LANCZOS)
+
+
+def clip_rgba_to_mask(img: Image.Image, mask: Image.Image) -> Image.Image:
+    r, g, b, a = img.split()
+    return Image.merge("RGBA", (r, g, b, ImageChops.multiply(a, mask)))
+
+
+def compose_baked_white_squircle(mark: Image.Image) -> Image.Image:
+    """BakedWhiteSquircleMaster: white squircle + centered mark (~68% of card)."""
+    card_w = CANVAS * (1.0 - 2.0 * CARD_INSET_FRAC)
+    target_w = max(1, int(round(card_w * MARK_SCALE)))
     scale = target_w / mark.size[0]
     target_h = max(1, int(round(mark.size[1] * scale)))
     sized = mark.resize((target_w, target_h), Image.Resampling.LANCZOS)
 
-    canvas = Image.new("RGBA", (CANVAS, CANVAS), (255, 255, 255, 255))
+    mask = squircle_mask(CANVAS)
+    card = Image.new("RGBA", (CANVAS, CANVAS), (255, 255, 255, 255))
+    card.putalpha(mask)
+
     x = (CANVAS - target_w) // 2
     y = (CANVAS - target_h) // 2
 
+    content = Image.new("RGBA", (CANVAS, CANVAS), (0, 0, 0, 0))
     shadow = soft_contact_shadow(sized)
-    # Shadow pad so blur/offset stay on-canvas without clipping the soft falloff.
     pad = SHADOW_BLUR * 2 + abs(SHADOW_Y_OFFSET)
     shadow_layer = Image.new("RGBA", (CANVAS + pad * 2, CANVAS + pad * 2), (0, 0, 0, 0))
     shadow_layer.paste(shadow, (pad + x, pad + y + SHADOW_Y_OFFSET), shadow)
     shadow_cropped = shadow_layer.crop((pad, pad, pad + CANVAS, pad + CANVAS))
-    canvas = Image.alpha_composite(canvas, shadow_cropped)
-    canvas.paste(sized, (x, y), sized)
-    return canvas
+    content = Image.alpha_composite(content, shadow_cropped)
+    content.paste(sized, (x, y), sized)
+    content = clip_rgba_to_mask(content, mask)
+
+    return Image.alpha_composite(card, content)
 
 
 def write_png(img: Image.Image, path: Path, size: int) -> None:
@@ -210,7 +257,8 @@ def main() -> None:
     build_default = Path(__file__).resolve().parents[1] / "build"
     parser = argparse.ArgumentParser(
         description=(
-            "Build OpaqueWhiteSquareMaster icons for Dock (OS masks squircle)."
+            "Build BakedWhiteSquircleMaster icons for Dock "
+            "(white squircle baked into PNG; transparent corners)."
         )
     )
     parser.add_argument(
@@ -230,8 +278,7 @@ def main() -> None:
     build = args.build_dir
     source = resolve_source(args.source, build)
     mark = prepare_mark(load_rgba(source))
-    # Intentional opaque white square for Dock; macOS supplies the squircle mask.
-    master = compose_opaque_white_square(mark)
+    master = compose_baked_white_squircle(mark)
     icons = build / "icons"
 
     write_png(master, build / "icon-source.png", CANVAS)
@@ -246,7 +293,7 @@ def main() -> None:
     write_icns(master, build / "icon.icns")
     write_icns(master, build / "icon_installer.icns")
 
-    print(f"regenerated OpaqueWhiteSquareMaster icons in {build} from {source}")
+    print(f"regenerated BakedWhiteSquircleMaster icons in {build} from {source}")
 
 
 if __name__ == "__main__":
